@@ -1,0 +1,3 @@
+#url: "https://lava.infra.foundries.io/pduserver/"
+url: "http://localhost:8001/ws/"
+token: "my-secret-token"
