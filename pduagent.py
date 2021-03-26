@@ -26,15 +26,9 @@ import yaml
 
 from dotmap import DotMap
 
-logging.Formatter.convert = time.gmtime
-LOG = logging.getLogger("pduagent")
-FORMAT = "%(asctime)-15s %(levelname)7s %(message)s"
-LOG.setLevel(logging.DEBUG)
-fh = logging.FileHandler('pduagent.log')
-fh.setLevel(logging.DEBUG)
-LOG.addHandler(fh)
 
 async def listen_for_events(config, event: asyncio.Event) -> None:
+    LOG = logging.getLogger("pduagent")
     LOG.info("Starting event listener")
     headers = {
         "Authorization": f"Token: {config.token}"
@@ -81,6 +75,15 @@ parser.add_argument(
     required=True,
     help="Path of the Agent config file"
 )
+parser.add_argument(
+    "--logfile",
+    help="Path to the file that contains logs"
+)
+parser.add_argument(
+    "--loglevel",
+    default="INFO",
+    help="Path to the file that contains logs"
+)
 
 args = parser.parse_args()
 
@@ -90,9 +93,22 @@ with open(args.config, "r") as conf_file:
         yaml_config = yaml.safe_load(conf_file)
         config = DotMap(yaml_config)
     except yaml.YAMLError as exc:
-        LOG.error("Config file corrupted")
-        LOG.error(exc)
         sys.exit(1)
+
+loglevel = logging.getLevelName(args.loglevel)
+
+logging.Formatter.convert = time.gmtime
+FORMAT = "%(asctime)-15s %(levelname)7s %(message)s"
+formatter = logging.Formatter(FORMAT)
+LOG = logging.getLogger("pduagent")
+LOG.setLevel(loglevel)
+if not args.logfile:
+    handler = logging.StreamHandler()
+else:
+    handler = logging.FileHandler(args.logfile)
+handler.setLevel(loglevel)
+handler.setFormatter(formatter)
+LOG.addHandler(handler)
 
 if not config:
     LOG.error("Config is empty")
