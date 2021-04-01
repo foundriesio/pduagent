@@ -55,7 +55,7 @@ async def listen_for_events(config, event: asyncio.Event) -> None:
                                 sys.exit(1)
                             if "cmd" in data.keys():
                                 LOG.info("Executing cmd: %s" % data["cmd"])
-                                #subprocess.run(shlex.split(data["cmd"]))
+                                subprocess.run(shlex.split(data["cmd"]))
                         except ValueError:
                             LOG.error("[EVENT] Invalid message: %s", msg)
                             continue
