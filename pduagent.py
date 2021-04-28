@@ -36,7 +36,7 @@ async def listen_for_events(config, event: asyncio.Event) -> None:
     while True:
         with contextlib.suppress(aiohttp.ClientError):
             async with aiohttp.ClientSession(headers=headers) as session:
-                async with session.ws_connect(config.url) as ws:
+                async with session.ws_connect(config.url, autoclose=False, heartbeat=59) as ws:
                     LOG.info("Session connected")
                     async for msg in ws:
                         if msg.type == aiohttp.WSMsgType.CLOSE:
